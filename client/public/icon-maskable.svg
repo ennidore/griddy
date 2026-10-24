@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Maskable variant: full-bleed background, artwork kept inside the central safe zone. -->
+  <rect width="512" height="512" fill="#6d5bff"/>
+  <g font-family="'Space Grotesk','Segoe UI',Arial,sans-serif" font-weight="800" font-size="104" text-anchor="middle">
+    <rect x="148" y="148" width="102" height="102" rx="16" fill="#ffffff"/>
+    <text x="199" y="236" fill="#1d2230">G</text>
+    <rect x="262" y="148" width="102" height="102" rx="16" fill="#ffffff"/>
+    <text x="313" y="236" fill="#1d2230">R</text>
+    <rect x="148" y="262" width="102" height="102" rx="16" fill="#ffffff"/>
+    <text x="199" y="350" fill="#1d2230">D</text>
+    <rect x="262" y="262" width="102" height="102" rx="16" fill="#ffc23d"/>
+    <text x="313" y="350" fill="#1d2230">Y</text>
+  </g>
+</svg>

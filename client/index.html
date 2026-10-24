@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="hr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Griddy</title>
+    <meta name="description" content="Griddy: hrvatska igra riječi uživo. Svi igraju istu ploču u isto vrijeme, natječi se s prijateljima." />
+    <meta name="application-name" content="Griddy" />
+    <meta name="theme-color" content="#f6f3ee" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#15171f" media="(prefers-color-scheme: dark)" />
+
+    <!-- Installable app (PWA) -->
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/icon-192.png" type="image/png" sizes="192x192" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Griddy" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+
+    <!-- Link previews -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Griddy" />
+    <meta property="og:description" content="Hrvatska igra riječi uživo. Svi igraju istu ploču u isto vrijeme." />
+    <meta property="og:image" content="/icon-512.png" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

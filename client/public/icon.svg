@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Griddy app icon: a 2×2 corner of the letter grid. -->
+  <rect width="512" height="512" rx="96" fill="#6d5bff"/>
+  <g font-family="'Space Grotesk','Segoe UI',Arial,sans-serif" font-weight="800" font-size="150" text-anchor="middle">
+    <rect x="96" y="96" width="148" height="148" rx="22" fill="#ffffff"/>
+    <rect x="96" y="232" width="148" height="12" rx="6" fill="#d9d3ff"/>
+    <text x="170" y="222" fill="#1d2230">G</text>
+    <rect x="268" y="96" width="148" height="148" rx="22" fill="#ffffff"/>
+    <rect x="268" y="232" width="148" height="12" rx="6" fill="#d9d3ff"/>
+    <text x="342" y="222" fill="#1d2230">R</text>
+    <rect x="96" y="268" width="148" height="148" rx="22" fill="#ffffff"/>
+    <rect x="96" y="404" width="148" height="12" rx="6" fill="#d9d3ff"/>
+    <text x="170" y="394" fill="#1d2230">D</text>
+    <rect x="268" y="268" width="148" height="148" rx="22" fill="#ffc23d"/>
+    <rect x="268" y="404" width="148" height="12" rx="6" fill="#d99a12"/>
+    <text x="342" y="394" fill="#1d2230">Y</text>
+  </g>
+</svg>

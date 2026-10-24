@@ -1,0 +1,17 @@
+# docker compose up -d --build   → Griddy on http://localhost:3001
+services:
+  griddy:
+    build: .
+    image: griddy:1.0.0
+    ports:
+      - "3001:3001"
+    volumes:
+      - griddy-data:/data
+    environment:
+      # Behind a reverse proxy (nginx, Caddy, a cloud load balancer) set this to the number of
+      # proxy hops (usually 1) so login rate limits see real client IPs.
+      TRUST_PROXY: "1"
+    restart: unless-stopped
+
+volumes:
+  griddy-data:

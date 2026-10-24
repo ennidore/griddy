@@ -1,0 +1,114 @@
+@import "tailwindcss";
+
+/* Theme tokens. Surfaces/ink are overridden per background below, so every
+   utility (bg-paper, bg-surface, text-ink …) follows the active theme. */
+@theme {
+  --font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+
+  --color-paper: #f6f3ee;
+  --color-paper-deep: #ece7df;
+  --color-surface: #ffffff;
+  --color-line: #e3ddd3;
+  --color-ink: #1d2230;
+  --color-ink-soft: #5b6275;
+
+  --color-grape: #6d5bff;
+  --color-grape-soft: #e6e2ff;
+  --color-grape-deep: #4f3fe0;
+  --color-coral: #ff6a5c;
+  --color-mint: #22c39d;
+  --color-sun: #ffc23d;
+  --color-sky: #3fa9ff;
+}
+
+/* ---- Light backgrounds */
+/* Borovnica uses the default (blue-violet) tokens from @theme. */
+html[data-bg="borovnica"] {
+  color-scheme: light;
+}
+
+html[data-bg="jabuka"] {
+  color-scheme: light;
+  --color-paper: #eaf5ef;
+  --color-paper-deep: #d8ebe1;
+  --color-surface: #fbfefc;
+  --color-line: #c7dfd2;
+  --color-ink: #17312a;
+  --color-ink-soft: #4f6d63;
+  --color-grape: #17a173;
+  --color-grape-soft: #d3eee2;
+  --color-grape-deep: #0e7553;
+}
+
+/* ---- Dark backgrounds */
+html[data-bg="noc"] {
+  color-scheme: dark;
+  --color-paper: #15171f;
+  --color-paper-deep: #0e1016;
+  --color-surface: #1f222d;
+  --color-line: #0a0b10;
+  --color-ink: #eef0f6;
+  --color-ink-soft: #9aa1b5;
+  --color-grape: #8576ff;
+  --color-grape-soft: #2b2850;
+  --color-grape-deep: #5a4bd6;
+}
+
+html[data-bg="ponoc"] {
+  color-scheme: dark;
+  --color-paper: #0f1630;
+  --color-paper-deep: #0a1024;
+  --color-surface: #18213f;
+  --color-line: #060a18;
+  --color-ink: #e9eeff;
+  --color-ink-soft: #95a0c8;
+  --color-grape: #22b58a;
+  --color-grape-soft: #173d3f;
+  --color-grape-deep: #127a5c;
+}
+
+/* ---- Red-accent backgrounds */
+html[data-bg="jagoda"] {
+  color-scheme: light;
+  --color-paper: #fbf1ef;
+  --color-paper-deep: #f3e1dd;
+  --color-surface: #fffafa;
+  --color-line: #ecd3cd;
+  --color-ink: #2a1a1c;
+  --color-ink-soft: #75585b;
+  --color-grape: #e5383b;
+  --color-grape-soft: #fde0df;
+  --color-grape-deep: #b3202a;
+}
+
+html[data-bg="zar"] {
+  color-scheme: dark;
+  --color-paper: #1a1214;
+  --color-paper-deep: #120c0d;
+  --color-surface: #261a1c;
+  --color-line: #0b0707;
+  --color-ink: #f7eceb;
+  --color-ink-soft: #b59a9b;
+  --color-grape: #ff5a5f;
+  --color-grape-soft: #4a2124;
+  --color-grape-deep: #b8262d;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  @apply bg-paper font-display text-ink antialiased;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior: none;
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+/* Thin, unobtrusive scrollbars for lists */
+.scroll-soft {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--color-ink) 20%, transparent) transparent;
+}

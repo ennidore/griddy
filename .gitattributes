@@ -1,0 +1,5 @@
+# Store text with LF line endings in the repo (works on every OS and in Docker).
+* text=auto eol=lf
+*.png binary
+*.jpg binary
+*.webp binary

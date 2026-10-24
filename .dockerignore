@@ -1,0 +1,11 @@
+**/node_modules
+client/dist
+server/data/db.json*
+server/data/avatars
+**/.env
+**/.env.local
+.claude
+.git
+*.log
+Dockerfile
+docker-compose.yml
