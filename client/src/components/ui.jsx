@@ -1,7 +1,9 @@
+import { useSyncExternalStore } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { ArrowLeft, Coins, Moon, Sun } from 'lucide-react';
+import { ArrowLeft, Coins, Moon, Sun, Volume2, VolumeX } from 'lucide-react';
 import { useGame } from '../context/GameContext.jsx';
 import { useTheme } from '../context/ThemeContext.jsx';
+import { music } from '../lib/music.js';
 
 /** Coin balance. Pass `onClick` to make it a button (used on the home page only). */
 export function CoinPill({ className = '', onClick, active = false }) {
@@ -71,6 +73,28 @@ export function IconButton({ onClick, label, children, className = '' }) {
       className={`grid size-10 shrink-0 place-items-center rounded-md bg-surface text-ink shadow-sm transition active:scale-90 ${className}`}
     >
       {children}
+    </button>
+  );
+}
+
+/**
+ * Sound on/off: background music and game effects (remembered per device).
+ * `overlay` styles it for the answer/results panels (paper background, no shadow).
+ */
+export function SoundToggle({ overlay = false }) {
+  const on = useSyncExternalStore(music.subscribe, music.isEnabled);
+  const label = on ? 'Isključi zvuk' : 'Uključi zvuk';
+  return (
+    <button
+      onClick={() => music.setEnabled(!on)}
+      aria-label={label}
+      title={label}
+      aria-pressed={on}
+      className={`grid size-10 shrink-0 place-items-center rounded-md text-ink transition active:scale-90 ${
+        overlay ? 'bg-paper' : 'bg-surface shadow-sm'
+      }`}
+    >
+      {on ? <Volume2 className="size-5" /> : <VolumeX className="size-5 text-ink-soft" />}
     </button>
   );
 }

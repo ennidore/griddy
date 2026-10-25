@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Check, Coins, Crown, MessageCircle, Trophy, UserPlus } from 'lucide-react';
 import Overlay, { OverlayBack } from './Overlay.jsx';
+import { SoundToggle } from '../ui.jsx';
 import PhaseCountdown from './PhaseCountdown.jsx';
 import Chat from './Chat.jsx';
 import Avatar from '../Avatar.jsx';
@@ -47,6 +48,7 @@ export default function LeaderboardChat({ onBack }) {
           <Trophy className="size-5 text-sun" /> Rezultati runde
         </h2>
         <PhaseCountdown label="Nova runda za" />
+        <SoundToggle overlay />
       </div>
 
       {mine?.rewards?.coins > 0 || mine?.rewards?.xp > 0 ? (

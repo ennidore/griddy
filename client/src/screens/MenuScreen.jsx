@@ -2,7 +2,7 @@ import { motion } from 'framer-motion';
 import { Palette, Pencil, Play, Trophy, Users } from 'lucide-react';
 import Avatar from '../components/Avatar.jsx';
 import CoinInfo from '../components/CoinInfo.jsx';
-import { LevelBar, ThemeToggle } from '../components/ui.jsx';
+import { LevelBar, SoundToggle, ThemeToggle } from '../components/ui.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useGame } from '../context/GameContext.jsx';
 import { useSocial } from '../context/SocialContext.jsx';
@@ -60,6 +60,7 @@ export default function MenuScreen({ nav }) {
         </h1>
         <div className="flex items-center gap-2">
           <CoinInfo />
+          <SoundToggle />
           <ThemeToggle />
         </div>
       </header>

@@ -1,6 +1,6 @@
 // Griddy service worker: makes the app installable and loads it fast on repeat visits.
 // The game itself is live (Socket.io), so nothing here works offline beyond the app shell.
-const CACHE = 'griddy-v1';
+const CACHE = 'griddy-v2';
 const SHELL = ['/', '/manifest.webmanifest', '/icon.svg', '/icon-192.png', '/icon-512.png'];
 
 self.addEventListener('install', (event) => {
@@ -23,8 +23,8 @@ self.addEventListener('fetch', (event) => {
   if (request.method !== 'GET' || url.origin !== self.location.origin) return;
   if (url.pathname.startsWith('/api/') || url.pathname.startsWith('/socket.io/')) return;
 
-  // Fingerprinted build assets: cache-first (their names change on every release).
-  if (url.pathname.startsWith('/assets/')) {
+  // Fingerprinted build assets and the music: cache-first (rename the file to ship new audio).
+  if (url.pathname.startsWith('/assets/') || url.pathname.startsWith('/audio/')) {
     event.respondWith(
       caches.match(request).then(
         (hit) =>

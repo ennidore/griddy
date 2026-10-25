@@ -2,10 +2,15 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react
 import { motion, useAnimationControls } from 'framer-motion';
 import Tile, { skinStyle } from './Tile.jsx';
 import { MIN_WORD_LENGTH, isAdjacent } from '../../lib/game.js';
+import { sfx } from '../../lib/sfx.js';
+import { haptics } from '../../lib/haptics.js';
 
 // Hit radius as a fraction of tile width. Smaller than 0.5 so a diagonal drag
 // passes through the gap between tiles without grazing the orthogonal neighbours.
 const HIT_RADIUS = 0.38;
+
+// Ignore presses this long after the board unlocks (round start / overlay closing).
+const START_GRACE_MS = 350;
 
 const FLASH_STATUS = { ok: 'ok', already_found: 'dup' };
 
@@ -69,9 +74,17 @@ export default function Board({ board, size = 4, roundId, disabled, skin, onSubm
   }, [setPathBoth]);
 
   // Cancel an in-progress drag when the round ends or the board changes.
+  // Also remember when the board unlocks: presses in the first moment after
+  // that are ignored, so a swipe or tap aimed at the closing results screen
+  // can't land on the fresh board and submit a word by accident.
+  const enabledAtRef = useRef(0);
   useEffect(() => {
     if (disabled) reset();
+    else enabledAtRef.current = performance.now();
   }, [disabled, reset]);
+
+  const roundIdRef = useRef(roundId);
+  roundIdRef.current = roundId;
   useEffect(() => {
     reset();
     setFlash(null);
@@ -88,14 +101,22 @@ export default function Board({ board, size = 4, roundId, disabled, skin, onSubm
     const cur = pathRef.current;
     const last = cur[cur.length - 1];
     if (i === last) return;
-    if (cur.length > 1 && i === cur[cur.length - 2]) return setPathBoth(cur.slice(0, -1)); // backtrack
+    if (cur.length > 1 && i === cur[cur.length - 2]) {
+      // backtrack
+      sfx.back(cur.length - 1);
+      haptics.back();
+      return setPathBoth(cur.slice(0, -1));
+    }
     if (cur.includes(i) || !isAdjacent(last, i, size)) return;
+    sfx.tile(cur.length + 1);
+    haptics.tile();
     setPathBoth([...cur, i]);
   };
 
   // ---- pointer handlers
   const handlePointerDown = (e) => {
     if (disabled || pointerIdRef.current !== null) return;
+    if (performance.now() - enabledAtRef.current < START_GRACE_MS) return;
     const p = toLocal(e);
     const i = hitTest(p);
     if (i < 0) return;
@@ -105,6 +126,8 @@ export default function Board({ board, size = 4, roundId, disabled, skin, onSubm
     lastPointRef.current = p;
     setCursor(p);
     setFlash(null);
+    sfx.tile(1);
+    haptics.tile();
     setPathBoth([i]);
   };
 
@@ -130,8 +153,21 @@ export default function Board({ board, size = 4, roundId, disabled, skin, onSubm
     reset();
     if (submitted.length < MIN_WORD_LENGTH) return;
 
+    const submittedIn = roundIdRef.current;
     const res = await onSubmit(submitted);
+    // Reply for a round that has already ended: don't flash the new board.
+    if (res.reason === 'stale' || roundIdRef.current !== submittedIn) return;
     const status = FLASH_STATUS[res.ok ? 'ok' : res.reason] || 'bad';
+    if (status === 'ok') {
+      sfx.valid(submitted.length);
+      haptics.valid();
+    } else if (status === 'dup') {
+      sfx.duplicate();
+      haptics.duplicate();
+    } else {
+      sfx.invalid();
+      haptics.invalid();
+    }
     setFlash({ path: submitted, status, id: Date.now() });
     if (status === 'bad') shake.start({ x: [0, -8, 8, -5, 5, 0], transition: { duration: 0.35 } });
   };

@@ -48,7 +48,7 @@ griddy/
 │   └── test/                    node:test: game logic, progression, store, accounts
 └── client/                      React (Vite) · Tailwind v4 · Framer Motion · Lucide
     ├── vite.config.js           dev proxy for /socket.io + /api to :3001, app version
-    ├── public/                  manifest, service worker (sw.js), app icons
+    ├── public/                  manifest, service worker (sw.js), app icons, audio/ (music loop)
     └── src/
         ├── main.jsx · App.jsx (screen navigation) · index.css (theme tokens per background)
         ├── lib/                 socket, avatars, image (crop/resize uploads), cosmetics, game helpers
@@ -149,6 +149,34 @@ without scrolling:
 - the timer
 
 There's no live scoreboard, so the race stays about the board.
+
+**Background music.** "The Tenth Move" plays on the menus and between rounds. It fades out
+(1.2 s) when you start playing a round and back in (2.5 s) when the round ends. The track is
+looped seamlessly with the Web Audio API (`client/src/lib/music.js`):
+- **Loop point:** the file was cut at 119.73 BPM with the loop jumping 160 beats (0.07 s → 80.26 s,
+  intro downbeat to outro downbeat).
+- **Crossfade:** a 1 s equal-power crossfade into the intro is built into the file, so the jump
+  is inaudible.
+
+Browsers only allow sound after the first tap or click. The speaker button (menu, answers and
+results screens) switches all sound, music and effects, on or off. The choice is remembered per
+device. Sound also goes quiet while the app is in the background. Files:
+`client/public/audio/the-tenth-move.m4a` (AAC) and `.webm` (Opus fallback).
+
+**Sound effects and vibration.** Connecting letters plays soft plucked notes that climb a C-major
+pentatonic scale as the word grows, so any path sounds melodic. Dragging back onto the previous
+letter gives a softer, lower tick. After submitting:
+
+| Result | Sound | Vibration |
+|---|---|---|
+| Valid word | rising chime (longer for longer words) | double tap |
+| Already found | two level notes | single tick |
+| Not a word | low falling thud | one short buzz |
+
+Effects are synthesized live with Web Audio (`client/src/lib/sfx.js`, no files) and keep playing
+while the music is faded out during a round. Vibration (`client/src/lib/haptics.js`) is very short
+(5–28 ms) and works where the browser supports it: Android Chrome, Edge and Firefox. iPhone
+browsers don't allow web pages to vibrate, so there it does nothing.
 
 **Profile pictures.** Pick a preset or upload your own image. The browser crops it to a square
 and shrinks it to 256 px. The game server stores it in `server/data/avatars/` and serves it at

@@ -12,6 +12,7 @@ import { useGame } from '../context/GameContext.jsx';
 import { useCountdown } from '../hooks/useCountdown.js';
 import { PHASE, formatClock, toWord } from '../lib/game.js';
 import { skinFor } from '../lib/cosmetics.js';
+import { music } from '../lib/music.js';
 
 function WaitingCover() {
   const { state } = useGame();
@@ -74,7 +75,7 @@ export default function GameScreen({ nav }) {
   const handleSubmit = useCallback(
     async (path) => {
       const res = await submitPath(path);
-      setLastResult({ ...res, id: Date.now() });
+      if (res.reason !== 'stale') setLastResult({ ...res, id: Date.now() });
       return res;
     },
     [submitPath],
@@ -85,6 +86,18 @@ export default function GameScreen({ nav }) {
     const t = setTimeout(() => setLastResult(null), 1600);
     return () => clearTimeout(t);
   }, [lastResult]);
+
+  // A new round starts with a clean slate (the clear-timer above can be paused
+  // while the phone screen is off or the tab is in the background).
+  const roundId = state?.roundId;
+  useEffect(() => setLastResult(null), [roundId]);
+
+  // Background music: silent only while you're playing a round. It fades out
+  // when the round starts and back in for the answers/results and the menu.
+  const playingRound =
+    mode === 'playing' && state?.phase === PHASE.ACTIVE && me.joined && me.roundId === state?.roundId;
+  useEffect(() => music.setInRound(playingRound), [playingRound]);
+  useEffect(() => () => music.setInRound(false), []);
 
   if (!state) {
     return (
@@ -107,7 +120,11 @@ export default function GameScreen({ nav }) {
       <GamePanel onBack={nav.back} />
 
       <main className="flex-1">
-        <WordPreview currentWord={currentWord} result={lastResult} />
+        <WordPreview
+          key={state.roundId}
+          currentWord={currentWord}
+          result={lastResult?.roundId === state.roundId ? lastResult : null}
+        />
         <div className="relative">
           <Board
             board={state.board}

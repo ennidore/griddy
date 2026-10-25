@@ -123,6 +123,9 @@ export function GameProvider({ children }) {
   const submitPath = useCallback(async (path) => {
     const roundId = roundIdRef.current;
     const res = await request(socketRef.current, 'word:submit', { roundId, path });
+    // The round changed while we waited: the verdict belongs to a finished round.
+    // Drop it so it can't show up (or overwrite progress) in the new one.
+    if (roundIdRef.current !== roundId) return { ok: false, reason: 'stale', roundId };
     if (res.ok) {
       setMe((m) => ({
         ...m,
@@ -131,7 +134,7 @@ export function GameProvider({ children }) {
         words: [{ word: res.word, points: res.points }, ...(m.roundId === roundId ? m.words : [])],
       }));
     }
-    return res;
+    return { ...res, roundId };
   }, []);
 
   const sendChat = useCallback((text) => socketRef.current?.emit('chat:send', { text }), []);

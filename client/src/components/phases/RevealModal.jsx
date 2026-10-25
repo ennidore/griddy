@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Check, Eye } from 'lucide-react';
 import Overlay, { OverlayBack } from './Overlay.jsx';
+import { SoundToggle } from '../ui.jsx';
 import PhaseCountdown from './PhaseCountdown.jsx';
 import { useGame } from '../../context/GameContext.jsx';
 import { upper } from '../../lib/game.js';
@@ -76,6 +77,7 @@ export default function RevealModal({ onBack }) {
           <Eye className="size-5 shrink-0 text-grape" /> Rješenja
         </h2>
         <PhaseCountdown label="Rezultati za" />
+        <SoundToggle overlay />
       </div>
 
       <div className="grid grid-cols-2 gap-2 px-4 pt-3">
