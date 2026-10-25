@@ -13,6 +13,7 @@ const ERRORS = {
   bad_username: 'Korisničko ime: 3–20 znakova (slova, brojke, _ . -).',
   bad_password: 'Lozinka mora imati barem 6 znakova.',
   username_taken: 'To korisničko ime je zauzeto.',
+  inappropriate_username: 'To korisničko ime nije dopušteno. Odaberi drugo.',
   wrong_credentials: 'Pogrešno korisničko ime ili lozinka.',
   rate_limited: 'Previše pokušaja. Pričekaj minutu.',
   mismatch: 'Lozinke se ne podudaraju.',

@@ -1,5 +1,6 @@
 import { randomBytes, scrypt as scryptCb, timingSafeEqual, createHash } from 'node:crypto';
 import { promisify } from 'node:util';
+import { hasProfanity } from '../moderation/profanity.js';
 
 const scrypt = promisify(scryptCb);
 const KEY_LEN = 64;
@@ -31,6 +32,7 @@ export const PASSWORD_MAX = 100;
 export function validateCredentials(username, password) {
   const name = String(username || '').trim();
   if (!USERNAME_RE.test(name)) return { ok: false, reason: 'bad_username' };
+  if (hasProfanity(name)) return { ok: false, reason: 'inappropriate_username' };
   const pw = String(password || '');
   if (pw.length < PASSWORD_MIN || pw.length > PASSWORD_MAX) return { ok: false, reason: 'bad_password' };
   return { ok: true, username: name, password: pw };

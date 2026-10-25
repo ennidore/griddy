@@ -1,6 +1,6 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { randomUUID } from 'node:crypto';
+import { randomUUID, timingSafeEqual } from 'node:crypto';
 import { levelFromXp, levelProgress } from '../progression/levels.js';
 import { DEFAULT_TILE, STARTER_ITEMS, STARTING_COINS } from '../shop/catalog.js';
 
@@ -42,7 +42,8 @@ export class JsonStore {
     this.filePath = filePath;
     // accounts: lowercased username → { id, username, passwordHash, createdAt }
     // sessions: sha256(token) → { accountKey, createdAt, lastUsedAt }
-    this.data = { players: {}, friendships: {}, messages: {}, reads: {}, accounts: {}, sessions: {} };
+    // guestSecrets: guest id → sha256(secret); proves a connecting guest owns that id
+    this.data = { players: {}, friendships: {}, messages: {}, reads: {}, accounts: {}, sessions: {}, guestSecrets: {} };
     this.saveTimer = null;
   }
 
@@ -146,6 +147,25 @@ export class JsonStore {
   async deleteSession(tokenHash) {
     delete this.data.sessions[tokenHash];
     await this.flush(); // accounts/sessions are written immediately
+  }
+
+  // ------------------------------------------------------------- guests
+  // Guest ids are visible to other players (leaderboards, chat, friends), so an
+  // id alone must not be enough to play as that guest. The first connection
+  // that presents a secret for an id claims it; after that the id only works
+  // with the same secret.
+
+  /** → 'ok' (secret matches), 'claimed' (first use, now bound) or 'mismatch'. */
+  async verifyGuest(guestId, secretHash) {
+    const known = this.data.guestSecrets[guestId];
+    if (!known) {
+      this.data.guestSecrets[guestId] = secretHash;
+      await this.flush(); // written immediately, like accounts
+      return 'claimed';
+    }
+    const a = Buffer.from(known, 'hex');
+    const b = Buffer.from(secretHash, 'hex');
+    return a.length === b.length && timingSafeEqual(a, b) ? 'ok' : 'mismatch';
   }
 
   // ------------------------------------------------------------ players

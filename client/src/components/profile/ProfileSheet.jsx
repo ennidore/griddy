@@ -45,6 +45,7 @@ export default function ProfileSheet({ open, onClose }) {
       throw new Error(
         {
           username_taken: 'To korisničko ime je zauzeto.',
+          inappropriate_username: 'To korisničko ime nije dopušteno. Odaberi drugo.',
           bad_username: 'Korisničko ime: 3–20 znakova (slova, brojke, _ . -).',
         }[res.reason] || 'Spremanje nije uspjelo.',
       );

@@ -31,7 +31,21 @@ function write(key, value) {
   }
 }
 
-const loadGuest = () => read(GUEST_KEY, LEGACY_GUEST_KEYS);
+/** Random 32-byte secret, base64url. Proves to the server that this browser owns its guest id. */
+function newGuestSecret() {
+  const bytes = crypto.getRandomValues(new Uint8Array(32));
+  return btoa(String.fromCharCode(...bytes)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+
+/** Loads the guest, adding a secret to guests saved before secrets existed. */
+function loadGuest() {
+  const g = read(GUEST_KEY, LEGACY_GUEST_KEYS);
+  if (g && !g.secret) {
+    g.secret = newGuestSecret();
+    write(GUEST_KEY, g);
+  }
+  return g;
+}
 
 async function post(path, body, token) {
   const res = await fetch(`${API}/${path}`, {
@@ -48,7 +62,8 @@ async function post(path, body, token) {
  * Two ways in:
  *   account – username + password, handled by the game server; the session
  *             token is kept in localStorage and sent in the socket handshake
- *   guest   – no account; a stable random id, name and avatar in localStorage
+ *   guest   – no account; a random id (public) plus a secret (private), name and
+ *             avatar in localStorage; the secret proves the id is yours
  */
 export function AuthProvider({ children }) {
   const [session, setSession] = useState(() => read(SESSION_KEY, LEGACY_SESSION_KEYS)); // { token, id, username, avatar }
@@ -83,10 +98,38 @@ export function AuthProvider({ children }) {
 
   // ---- guests
   const playAsGuest = (name, avatar = DEFAULT_AVATAR) => {
-    const next = { id: guest?.id || crypto.randomUUID(), name, avatar, active: true };
+    const next = {
+      id: guest?.id || crypto.randomUUID(),
+      secret: guest?.secret || newGuestSecret(),
+      name,
+      avatar,
+      active: true,
+    };
     write(GUEST_KEY, next);
     setGuest(next);
   };
+
+  /** Applies a change to the saved guest (functional, so socket handlers can call it safely). */
+  const patchGuest = useCallback((fn) => {
+    setGuest((prev) => {
+      if (!prev) return prev;
+      const next = fn(prev);
+      if (next !== prev) write(GUEST_KEY, next);
+      return next;
+    });
+  }, []);
+
+  /** The server replaced an unsuitable nickname: show the name everyone else sees. */
+  const syncGuestName = useCallback(
+    (name) => patchGuest((g) => (g.name === name ? g : { ...g, name })),
+    [patchGuest],
+  );
+
+  /** This guest id was already claimed with a different secret: start over as a new guest. */
+  const resetGuestIdentity = useCallback(
+    () => patchGuest((g) => ({ ...g, id: crypto.randomUUID(), secret: newGuestSecret() })),
+    [patchGuest],
+  );
 
   const updateGuest = (patch) => {
     const next = { ...guest, ...patch };
@@ -131,7 +174,7 @@ export function AuthProvider({ children }) {
     const s = sessionRef.current;
     if (s) return { sessionToken: s.token };
     const g = loadGuest();
-    return { guestId: g?.id, guestName: g?.name, avatar: g?.avatar };
+    return { guestId: g?.id, guestSecret: g?.secret, guestName: g?.name, avatar: g?.avatar };
   }, []);
 
   const value = {
@@ -144,6 +187,8 @@ export function AuthProvider({ children }) {
     updateGuest,
     syncAccount,
     dropSession,
+    syncGuestName,
+    resetGuestIdentity,
     getSocketAuth,
   };
 

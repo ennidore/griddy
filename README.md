@@ -13,6 +13,7 @@ already running.
 griddy/
 ├── package.json                 npm workspaces: dev · build · start · test
 ├── Dockerfile · docker-compose.yml   production image (see "Deploying")
+├── LICENSE                      MIT for the code; notes on the word list and music
 ├── server/                      Node.js · Express · Socket.io
 │   ├── .env.example
 │   ├── data/words-hr.txt        final 39,298-word dictionary (see "Dictionary")
@@ -34,6 +35,7 @@ griddy/
 │   │   ├── shop/catalog.js         tile skins: price, level gate
 │   │   ├── store/JsonStore.js      accounts, sessions, players, inventory, friends, DMs (file-backed)
 │   │   ├── http/static.js       production: serves client/dist, security + cache headers
+│   │   ├── moderation/profanity.js   masks chat/DMs, refuses offensive names
 │   │   ├── auth/
 │   │   │   ├── passwords.js     scrypt hashing, session tokens, username/password rules
 │   │   │   └── routes.js        POST /api/auth/register · login · logout
@@ -188,6 +190,21 @@ players request each other the friendship is accepted automatically. The friends
 who's online and unread counts. Direct messages are delivered live to all of the recipient's
 open tabs and stored server-side (the last 200 per conversation).
 
+**Profanity filter** (`server/src/moderation/profanity.js`, server-side, so a modified client
+can't skip it):
+
+| Where | What happens |
+|---|---|
+| Round chat and direct messages | offensive words are masked (`k****`), the rest of the message goes through |
+| Account usernames (sign-up, rename) | refused with "To korisničko ime nije dopušteno" |
+| Guest nicknames | replaced with `Gost-xxxx`, and the player's browser adopts that name |
+
+It covers common Croatian/regional and English swear words and slurs, with or without
+diacritics. Matching sees through look-alike characters (`sh1t`, `j3b`), separators (`k.u.r.a.c`)
+and repeated letters (`kuuurac`), while sparing ordinary words like *kurir*, *picked* and
+*cocktail*. To add a word, edit the lists at the top of the file and run `npm test`. It stops
+everyday abuse, not a determined troll: there's no reporting or muting yet.
+
 **Game data store.** Progression, inventory, stats, friends and messages live in
 `server/data/db.json` via `JsonStore`, with debounced atomic writes. Every store method is async,
 so a Postgres-backed store can replace it without touching callers. The same file also holds
@@ -265,7 +282,16 @@ There are two ways in, both on the login screen:
   Usernames are unique regardless of case. Progress is tied to the account, so it follows you to
   any device.
 - **Gost (guest):** a nickname and an avatar, no password. Progress is tied to a random id saved
-  in that browser.
+  in that browser, together with a private secret.
+
+Guest ids are public: other players see them in rankings, chat and friend lists. So the id alone
+doesn't log you in:
+- The browser also keeps a random 32-byte secret that never leaves it, apart from being sent at
+  connection.
+- The first connection binds a hash of that secret to the id (`guestSecrets` in the store).
+- From then on the id only works with the same secret. Anyone else is refused with
+  `guest_taken`, and their browser starts a fresh guest.
+- Guests saved before this change get a secret automatically on their next visit.
 
 How it works (`server/src/auth/`):
 
@@ -373,7 +399,7 @@ Railway or Fly.io (build command `npm ci && npm run build`, start command `npm s
   coin balance and friendship.
 - **Credits:** the word list is derived from FrequencyWords (CC BY-SA 4.0) and hunspell-hr. The
   login screen credits both, so keep that line if you change the UI.
-- **Pick a license** for your own code before publishing the source.
+- **License:** the code is MIT (see `LICENSE`). The word list stays CC BY-SA 4.0, and the music track isn't covered; both are listed in `LICENSE`.
 
 What the server adds in production: security headers (CSP, `X-Frame-Options`, `nosniff`,
 referrer and permissions policies), long-term caching for fingerprinted assets and `no-cache` for
@@ -384,7 +410,5 @@ shutdown.
 
 - Redis adapter for Socket.io plus a single "round leader" to scale past one server process
 - Pre-generate the next board during the reveal phase
-- Profanity filter for chat and usernames; per-IP rate limits
-- Signed guest tokens (guest ids are currently client-chosen, so a copied id could take over a guest's coins and friends)
 - Move `JsonStore` to Postgres once you run more than one server process
 - Weekly/daily leaderboards (the all-time one is live)

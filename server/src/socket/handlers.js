@@ -1,4 +1,5 @@
 import { randomUUID } from 'node:crypto';
+import { maskProfanity } from '../moderation/profanity.js';
 import { playerRoom } from '../services/progression.js';
 import { GAME_ROOM } from '../game/RoundManager.js';
 import { serializePlayer } from '../store/JsonStore.js';
@@ -76,7 +77,7 @@ export function registerSocketHandlers(io, { rounds, config, store }) {
     socket.on('chat:send', (payload) => {
       const now = Date.now();
       if (now - lastChatAt.t < config.chat.minIntervalMs) return;
-      const text = String(payload?.text || '').replace(/\s+/g, ' ').trim().slice(0, config.chat.maxLength);
+      const text = maskProfanity(String(payload?.text || '').replace(/\s+/g, ' ').trim().slice(0, config.chat.maxLength));
       if (!text) return;
       lastChatAt.t = now;
 

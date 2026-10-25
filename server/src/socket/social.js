@@ -1,4 +1,5 @@
 import { playerRoom } from '../services/progression.js';
+import { maskProfanity } from '../moderation/profanity.js';
 import { publicPlayer } from '../store/JsonStore.js';
 
 const MAX_DM_LENGTH = 500;
@@ -90,7 +91,7 @@ export function registerSocialHandlers(io, socket, { store }) {
 
   socket.on('dm:send', async (payload, ack) => {
     const to = String(payload?.to || '');
-    const text = String(payload?.text || '').replace(/\s+/g, ' ').trim().slice(0, MAX_DM_LENGTH);
+    const text = maskProfanity(String(payload?.text || '').replace(/\s+/g, ' ').trim().slice(0, MAX_DM_LENGTH));
     if (!text) return reply(ack, { ok: false, reason: 'empty' });
 
     const now = Date.now();

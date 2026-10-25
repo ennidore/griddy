@@ -2,6 +2,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { createHash } from 'node:crypto';
 import { USERNAME_RE } from '../auth/passwords.js';
+import { hasProfanity } from '../moderation/profanity.js';
 import { AVATAR_RE } from './auth.js';
 import { playerRoom } from '../services/progression.js';
 import { serializePlayer } from '../store/JsonStore.js';
@@ -30,6 +31,7 @@ export function registerProfileHandlers(io, socket, { store, config }) {
     if (payload?.name !== undefined) {
       const name = String(payload.name).trim();
       if (!USERNAME_RE.test(name)) return reply(ack, { ok: false, reason: 'bad_username' });
+      if (hasProfanity(name)) return reply(ack, { ok: false, reason: 'inappropriate_username' });
       const res = await store.renameAccount(me.id, name);
       if (!res.ok) return reply(ack, res);
       patch.name = name;

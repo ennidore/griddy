@@ -134,3 +134,19 @@ test('accounts: unique usernames, password check, sessions, rename', async () =>
   await store.deleteSession(hashToken('tok'));
   assert.equal(await store.getSessionAccount(hashToken('tok'), 60_000), null);
 });
+
+test('guest ids: first secret claims the id, others are refused', async () => {
+  const { hashToken } = await import('../src/auth/passwords.js');
+  const store = await freshStore();
+  const id = 'guest:1234-abcd-5678';
+  assert.equal(await store.verifyGuest(id, hashToken('owner-secret')), 'claimed');
+  assert.equal(await store.verifyGuest(id, hashToken('owner-secret')), 'ok');
+  assert.equal(await store.verifyGuest(id, hashToken('someone-else')), 'mismatch');
+});
+
+test('offensive usernames are refused at sign-up', async () => {
+  const { validateCredentials } = await import('../src/auth/passwords.js');
+  assert.equal(validateCredentials('kurac123', 'secret1').reason, 'inappropriate_username');
+  assert.equal(validateCredentials('Sh1tLord', 'secret1').reason, 'inappropriate_username');
+  assert.equal(validateCredentials('Ivana_92', 'secret1').ok, true);
+});

@@ -2,6 +2,7 @@
   "name": "griddy",
   "private": true,
   "version": "1.0.0",
+  "license": "MIT",
   "description": "Real-time multiplayer Croatian word-grid game",
   "workspaces": [
     "client",

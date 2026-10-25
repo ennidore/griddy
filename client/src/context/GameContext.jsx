@@ -22,7 +22,7 @@ const request = (socket, event, payload) =>
  * to the same socket through `socket` (see SocialContext).
  */
 export function GameProvider({ children }) {
-  const { identity, getSocketAuth, syncAccount, dropSession } = useAuth();
+  const { identity, getSocketAuth, syncAccount, dropSession, syncGuestName, resetGuestIdentity } = useAuth();
 
   const [socket, setSocket] = useState(null);
   const [connected, setConnected] = useState(false);
@@ -62,6 +62,8 @@ export function GameProvider({ children }) {
       setError(err.message);
       // Expired or revoked login: back to the sign-in screen.
       if (err.message === 'invalid_session') dropSession();
+      // Someone else already proved ownership of this guest id: continue as a new guest.
+      if (err.message === 'guest_taken') resetGuestIdentity();
     });
 
     s.on('sync', ({ state: st, you, chat: history, online, player: account, catalog: cat }) => {
@@ -73,6 +75,7 @@ export function GameProvider({ children }) {
       setPlayer(account);
       setCatalog(cat);
       if (account && !account.isGuest) syncAccount(account);
+      if (account?.isGuest) syncGuestName(account.name);
     });
 
     s.on('round:state', (st) => {
